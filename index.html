@@ -1,0 +1,429 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+	<title>reveal.js</title>
+
+	<link rel="stylesheet" href="css/reveal.css">
+	<link rel="stylesheet" href="css/theme/white.css">
+
+	<!-- Theme used for syntax highlighting of code -->
+	<link rel="stylesheet" href="lib/css/zenburn.css">
+
+	<!-- Printing and PDF exports -->
+	<script>
+		var link = document.createElement('link');
+		link.rel = 'stylesheet';
+		link.type = 'text/css';
+		link.href = window.location.search.match(/print-pdf/gi) ? 'css/print/pdf.css' : 'css/print/paper.css';
+		document.getElementsByTagName('head')[0].appendChild(link);
+	</script>
+	<style>
+		.container {
+			display: flex;
+		}
+
+		.col {
+			width: 40%;
+			flex: 1;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="reveal">
+		<div class="slides">
+			<section>
+				<img src="src/images/TypeScript-Type-vs-TypeScript-Interface.png"
+						style="background:none; border:none; box-shadow:none;">
+			</section>
+			<section>
+				<section>
+						<h2>Interface vs Type</h2>
+					<pre style="width: 45%; display: inline-block;"><code data-trim>
+						interface Person {
+						  name: string;
+						  age: number;
+						  gender?: string;
+						  setAge: SetAge;
+						}
+						  
+						interface SetAge {
+						  (age: number): void;
+						}
+					</code></pre>
+					<pre style="width: 45%; display: inline-block"><code data-trim>
+							type Person = {
+							  name: string;
+							  age: number;
+							  gender?: Gender;
+							  setAge: SetAge;
+							}
+							  
+							type SetAge = (age: number) => void;
+								
+							type Gender = string;
+					</code></pre>
+				</section>
+				<section>
+					<h2>Идентичные наименования</h2>
+					<p class="fragment fade-up">два интерфейса имеют одинаковые наименования, они будут слиты</p>
+					<p class="fragment fade-up">два псевдонима имеют одинаковые наименования, будет ошибка</p>
+				</section>
+				<section>
+						<pre style="width: 45%; display: inline-block;"><code data-trim>
+								interface Person {
+								  name: string;
+								  age: number;
+								  setAge: SetAge;
+								}
+								  
+								interface SetAge {
+								  (age: number): void;
+								}
+								  
+								interface Person {
+								  gender?: string;
+								}
+						</code></pre>
+						<pre style="width: 45%; display: inline-block"><code data-trim>
+								type Person = { // ошибка, дублируется наименование
+								  name: string;
+								  age: number;
+								  setAge: SetAge;
+								}
+								  
+								type SetAge = (age: number) => void;
+								  
+								type Gender = string;
+								  
+								type Person = { // ошибка, дублируется наименование
+								  gender?: Gender;
+								}
+						</code></pre>
+				</section>
+			</section>
+			<section>
+					<section>
+						<h2>extend</h2>
+						<pre style="width: 45%; display: inline-block;"><code data-trim>
+								interface SetAge {
+								  (age: number): void;
+								}
+								  
+								interface PersonActions {
+								  setAge: SetAge;
+								}
+								  
+								interface Person extends PersonActions {
+								  name: string;
+								  age: number;
+								}
+						</code></pre>
+						<pre style="width: 45%; display: inline-block"><code data-trim>
+                type SetAge = (age: number) => void;
+
+
+                type PersonActions = {
+                  setAge: SetAge;
+                }
+                
+
+                type Person = PersonActions & {
+                  name: string;
+                  age: number;
+                };
+						</code></pre>
+          </section>
+          <section>
+              <h2>Implemented</h2>
+              <pre style="width: 45%; display: inline-block;"><code data-trim>
+                  interface PersonAdditionalInfo {
+                   age: number;
+                  }
+                  
+                  interface Person extends PersonAdditionalInfo {
+                    name: string;
+                  }
+                  
+                  class PersonInfo implements Person {
+                    name: 'test';
+                    age: 2;
+                  }
+              </code></pre>
+              <pre style="width: 45%; display: inline-block"><code data-trim>
+                  type PersonAdditionalInfo = {
+                    age: number;
+                  }
+                  
+                  type Person = PersonAdditionalInfo & {
+                    name: string;
+                  }
+                  
+                  class PersonInfo implements Person {
+                    name: 'test';
+                    age: 2;
+                  }
+              </code></pre>
+            </section>
+            <section>
+                <h3>implements, когда используем "|" в type</h3>
+                <pre><code data-trim>
+                    type PersonAdditionalInfo = {
+                      age: number;
+                    }
+                    
+                    type Person = PersonAdditionalInfo | {
+                      name: string;
+                    }
+                    
+                    class PersonInfo implements Person { // ошибка
+                      name: 'test';
+                      age: 2;
+                    }
+                </code></pre>
+            </section>
+			</section>
+			<section>
+        <section>
+            <h3>Example</h3>
+            <pre><code data-trim>
+                interface DeviceError {
+                  text: string;
+                }
+                
+                interface Error {
+                  message: string;
+                }
+                
+                type PeripheralError = DeviceError | Error | string;
+            </code></pre>
+        </section>
+        <section>
+            <pre><code data-trim>
+                getErrorMessage(error: PeripheralError): string {
+                  if (error instanceof DeviceError) {
+                    return error.text;
+                  } else if (error instanceof Error) {
+                    return error.message;
+                  } else if (typeof error === "string") {
+                    return error;
+                  }
+                  return '';
+                }
+            </code></pre>
+        </section>
+        <section>
+            <pre><code data-trim>
+                getErrorMessage(error: PeripheralError): string {
+                  return error && error.text || error && error.message || error;
+                } // ошибка, т.к. непонятно какой instance
+            </code></pre>
+        </section>
+      </section>
+      <section>
+        <h2>Utility Types</h2>
+        <p class="fragment fade-up">Partial&lt;T&gt;</p>
+        <p class="fragment fade-up">Readonly&lt;T&gt;</p>
+        <p class="fragment fade-up">Record&lt;K,T&gt;</p>
+        <p class="fragment fade-up">Pick&lt;T,K&gt;</p>
+        <p class="fragment fade-up">Omit&lt;T,K&gt;</p>
+        <p class="fragment fade-up">Exclude&lt;T,U&gt;</p>
+        <p class="fragment fade-up">Required&lt;T&gt;</p>
+      </section>
+			<section>
+				<section>
+					<h2>Partial&lt;T&gt;</h2>
+				</section>
+				<section>
+            <h3>Interface</h3>
+            <pre><code data-trim>
+                interface PersonAdditionalInfo {
+                  age: number;
+                  fullName?: string;
+                }
+                
+                interface Person extends PersonAdditionalInfo {
+                  name: string;
+                }
+                
+                interface ShortPersonInfo extends Partial&lt;Person&gt;{
+                }
+            </code></pre>
+				</section>
+				<section>
+            <h3>Type</h3>
+            <pre><code data-trim>
+                interface PersonAdditionalInfo {
+                  age: number;
+                  fullName?: string;
+                }
+                
+                interface Person extends PersonAdditionalInfo {
+                  name: string;
+                }
+                
+                type ShortPersonInfo = Partial&lt;Person&gt;;
+            </code></pre>
+				</section>
+			</section>
+			<section>
+          <section>
+            <h2>ReadOnly</h2>
+          </section>
+          <section>
+              <pre><code data-trim>
+                  interface PersonAdditionallInfo{
+                    age: number;
+                    birthday: string;
+                  }
+                  
+                  interface Person extends Readonly&lt;PersonAdditionallInfo&gt; {
+                    name: string;
+                  }
+                  
+                  let person: Person = {
+                    name: 'Bill',
+                    birthday: '1.01.1990',
+                    age: 29
+                  };
+                  
+                  person.birthday = '30.02.1990'; // ошибка, свойство для чтения
+              </code></pre>
+          </section>
+        </section>
+			<section>
+          <section>
+              <h2>Pick</h2>
+            </section>
+            <section>
+                <pre><code data-trim>
+                    interface PersonAdditionallInfo{
+                      age: number;
+                      birthday: string;
+                    }
+                    
+                    interface Person extends Readonly&lt;PersonAdditionallInfo&gt; {
+                      name: string;
+                    }
+                    
+                    type ShortPersonInfo = Pick&lt;Person, 'name' | 'age'&gt;
+                    
+                    const shortPersonInfo: ShortPersonInfo = {
+                      name: 'Bill',
+                      age: 29,
+                    }
+                </code></pre>
+            </section>
+			</section>
+			<section>
+          <section>
+              <h2>Record</h2>
+            </section>
+            <section>
+                <pre><code data-trim>
+                    type Person = Record&lt;'name' | 'age', string&gt;
+
+                    const person: Person = {
+                      name: 'Bill',
+                      age: '29',
+                    }
+                </code></pre>
+            </section>
+        <section>
+          <pre><code data-trim>
+            interface PageInfo {
+              title: string;
+            }
+
+            type Page = 'home' | 'about' | 'contact';
+
+            const x: Record&lt;Page, PageInfo&gt; = {
+              about: { title: 'about' },
+              contact: { title: 'contact' },
+              home: { title: 'home' },
+            };
+          </code></pre>
+        </section>
+      </section>
+      <section>
+          <section>
+              <h2>Exclude</h2>
+            </section>
+            <section>
+                <pre><code data-trim>
+                    type Birthday = string | number;
+
+                    const bd1: Birthday = '25.05.1995'; 
+                    const bd2: Birthday = 1995;
+                    
+                    type BirthdayInfo = Exclude&lt;Birthday, number&gt;;
+                    
+                    const bd3: BirthdayInfo = '25.05.1995'; 
+                    const bd4: BirthdayInfo = 1995;
+                </code></pre>
+            </section>
+			</section>
+      <section>
+        <section>
+          <h2>Omit</h2>
+        </section>
+        <section>
+                <pre><code data-trim>
+                  interface Person {
+                    name: string;
+                    birthday: string;
+                    age: string;
+                  }
+
+                  type ShortPersonInfo = Omit&lt;Person, 'age'&gt;;
+
+                  const todo: TodoPreview = {
+                    name: 'Bill',
+                    birthday: '25.01.1990',
+                  };
+                </code></pre>
+        </section>
+      </section>
+      <section>
+      <section>
+        <h2>Required</h2>
+      </section>
+      <section>
+                <pre><code data-trim>
+                  interface Person {
+                    name?: string;
+                    age?: number;
+                  }
+
+                  const person: Person = { age: 20 }; // OK
+
+                  const obj2: Required&lt;Person&gt; = { age: 5 }; // ошибка, потерано свойство "name"
+                </code></pre>
+      </section>
+      </section>
+		</div>
+	</div>
+
+	<script src="lib/js/head.min.js"></script>
+	<script src="js/reveal.js"></script>
+
+	<script>
+		// More info about config & dependencies:
+		// - https://github.com/hakimel/reveal.js#configuration
+		// - https://github.com/hakimel/reveal.js#dependencies
+		Reveal.initialize({
+			dependencies: [
+				{ src: 'plugin/markdown/marked.js' },
+				{ src: 'plugin/markdown/markdown.js' },
+				{ src: 'plugin/notes/notes.js', async: true },
+				{ src: 'plugin/highlight/highlight.js', async: true, callback: function () { hljs.initHighlightingOnLoad(); } }
+			]
+		});
+	</script>
+</body>
+
+</html>
