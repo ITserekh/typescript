@@ -230,13 +230,15 @@
         <p class="fragment fade-up">Readonly&lt;T&gt;</p>
         <p class="fragment fade-up">Record&lt;K,T&gt;</p>
         <p class="fragment fade-up">Pick&lt;T,K&gt;</p>
-        <p class="fragment fade-up">Omit&lt;T,K&gt;</p>
         <p class="fragment fade-up">Exclude&lt;T,U&gt;</p>
+        <p class="fragment fade-up">Extract&lt;T,U&gt;</p>
+        <p class="fragment fade-up">Omit&lt;T,K&gt;</p>
         <p class="fragment fade-up">Required&lt;T&gt;</p>
       </section>
 			<section>
 				<section>
 					<h2>Partial&lt;T&gt;</h2>
+          <p class="fragment fade-up">данные могут отсутствовать</p>
 				</section>
 				<section>
             <h3>Interface</h3>
@@ -272,7 +274,8 @@
 			</section>
 			<section>
           <section>
-            <h2>ReadOnly</h2>
+            <h2>Readonly&lt;T&gt;</h2>
+            <p class="fragment fade-up">свойства только для чтения</p>
           </section>
           <section>
               <pre><code data-trim>
@@ -297,7 +300,8 @@
         </section>
 			<section>
           <section>
-              <h2>Pick</h2>
+              <h2>Pick&lt;T,K&gt;</h2>
+            <p class="fragment fade-up">использовать свойства K из модели T</p>
             </section>
             <section>
                 <pre><code data-trim>
@@ -321,7 +325,8 @@
 			</section>
 			<section>
           <section>
-              <h2>Record</h2>
+              <h2>Record&lt;K,T&gt;</h2>
+              <p class="fragment fade-up">сделать объект с ключами K, у которых тип T</p>
             </section>
             <section>
                 <pre><code data-trim>
@@ -351,7 +356,8 @@
       </section>
       <section>
           <section>
-              <h2>Exclude</h2>
+              <h2>Exclude&lt;T,U&gt;</h2>
+              <p class="fragment fade-up">выбросить U из T</p>
             </section>
             <section>
                 <pre><code data-trim>
@@ -363,13 +369,31 @@
                     type BirthdayInfo = Exclude&lt;Birthday, number&gt;;
                     
                     const bd3: BirthdayInfo = '25.05.1995'; 
-                    const bd4: BirthdayInfo = 1995;
+                    const bd4: BirthdayInfo = 1995; // ошибка
                 </code></pre>
             </section>
+        <section>
+          <h2>Extract&lt;T,U&gt;</h2>
+          <p class="fragment fade-up">оставить только U из T</p>
+        </section>
+        <section>
+                <pre><code data-trim>
+                    type Birthday = string | number;
+
+                    const bd1: Birthday = '25.05.1995';
+                    const bd2: Birthday = 1995;
+
+                    type BirthdayInfo = Extract&lt;Birthday, number&gt;;
+
+                    const bd3: BirthdayInfo = '25.05.1995'; // ошибка
+                    const bd4: BirthdayInfo = 1995;
+                </code></pre>
+        </section>
 			</section>
       <section>
         <section>
-          <h2>Omit</h2>
+          <h2>Omit&lt;T,K&gt;</h2>
+          <p class="fragment fade-up">убрать свойства K из типа T</p>
         </section>
         <section>
                 <pre><code data-trim>
@@ -390,7 +414,8 @@
       </section>
       <section>
       <section>
-        <h2>Required</h2>
+        <h2>Required&lt;T&gt;</h2>
+        <p class="fragment fade-up">сделать все свойства T обязательными</p>
       </section>
       <section>
                 <pre><code data-trim>
